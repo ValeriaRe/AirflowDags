@@ -1,4 +1,5 @@
 import os
+from io import BytesIO
 # Import MinIO library.
 from minio import Minio
 from minio.error import (ResponseError, BucketAlreadyOwnedByYou,
@@ -12,7 +13,7 @@ minioClient = Minio('minio:9000',
 
 # Make a bucket with the make_bucket API call.           
 #try:
-#    minioClient.make_bucket("mybucket", location="us-east-1")
+#    minioClient.make_bucket("target", location="us-east-1")
 #except ResponseError as err:
 #    print(err)
 
@@ -27,11 +28,21 @@ minioClient = Minio('minio:9000',
 #    print(err)
     
 # Get a full object.
+#try:
+#    data = minioClient.get_object('mybucket', 'my-testfile')
+#    #with open('my-testfile', 'wb') as file_data:
+#    for d in data.stream(32*1024):
+#        print(d)
+#        #file_data.write(d)
+#except ResponseError as err:
+#    print(err)
+    
+# move file
 try:
+    print("trying to move file ...")
     data = minioClient.get_object('mybucket', 'my-testfile')
-    #with open('my-testfile', 'wb') as file_data:
-    for d in data.stream(32*1024):
-        print(d)
-    #    file_data.write(d)
+    content = data.read()
+    minioClient.put_object('target', 'my-testfile', BytesIO(content),
+                    len(content), content_type='application/csv')
 except ResponseError as err:
     print(err)
